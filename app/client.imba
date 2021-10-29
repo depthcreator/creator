@@ -1,11 +1,29 @@
+import './components/image-dropbox'
+import './components/align-canvas'
+import align from './functions/align'
+
 global css html
 	ff:sans
 
+let state = 
+	left: null
+	right: null
+	offset: 0
+
+def processAlign
+	if state.left && state.right
+		align(state.left, state.right, 0.1)
+
 tag app
 	<self>
-		<header>
-			<svg[w:200px h:auto] src='./logo.svg'>
-			<p> "Edit {<code> "app/client.imba"} and save to reload"
-			<a href="https://imba.io"> "Learn Imba"
+		<div[d:flex]>
+			<div>
+				<p> "Left image dropbox"
+				<image-dropbox useImageCallback=(do(e) state.left = e)>
+			<div>
+				<p> "Right image dropbox"
+				<image-dropbox useImageCallback=(do(e) state.right = e)>
+		<align-canvas left=state.left right=state.right offset=state.offset>
+		<button @click=processAlign> "Align"
 
 imba.mount <app>
