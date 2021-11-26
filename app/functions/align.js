@@ -159,17 +159,50 @@ function extractPoints(matches, leftKeyPoints, rightKeyPoints) {
   return [leftPoints, rightPoints]
 }
 
-function calculateDistances(leftPoints, rightPoints) {
+function calculateOffsets(leftPoints, rightPoints) {
   let xd = []
   let yd = []
 
   let d = leftPoints.map((l, i) => {
     let r = rightPoints[i]
-    xd.push(r.x - l.x)
-    yd.push(r.y - l.y)
+    xd.push(l.x - r.x)
+    yd.push(l.y - r.y)
   })
 
   return [xd, yd]
+}
+
+function detectAndMatch(leftMat, rightMat) {
+  let leftGray = new cv.Mat()
+  let rightGray = new cv.Mat()
+
+  cv.cvtColor(leftMat, leftGray, cv.COLOR_BGR2GRAY)
+  cv.cvtColor(rightMat, rightGray, cv.COLOR_BGR2GRAY)
+
+  let leftKeyPoints = new cv.KeyPointVector()
+  let rightKeyPoints = new cv.KeyPointVector()
+
+  let leftDescriptors = new cv.Mat()
+  let rightDescriptors = new cv.Mat()
+
+  let orb = new cv.AKAZE()
+
+  // too large dimensions causes it to blow
+  orb.detectAndCompute(leftGray, new cv.Mat(), leftKeyPoints, leftDescriptors)
+  orb.detectAndCompute(rightGray, new cv.Mat(), rightKeyPoints, rightDescriptors)
+  console.log("features detected")
+
+  let bf = new cv.BFMatcher()
+  let matches = new cv.DMatchVectorVector()
+  bf.knnMatch(leftDescriptors, rightDescriptors, matches, 2)
+  console.log("knn matched")
+
+
+  return {
+    leftKeyPoints,
+    rightKeyPoints,
+    matches
+  }
 }
 
 export default function align(leftElement, rightElement, knnDistanceOption) {
@@ -180,35 +213,24 @@ export default function align(leftElement, rightElement, knnDistanceOption) {
   let right = cv.imread(rightElement)
   //getMatStats(right, 'original right image')
 
-  let leftGray = new cv.Mat()
-  let rightGray = new cv.Mat()
+  console.log("images loaded")
 
-  cv.cvtColor(left, leftGray, cv.COLOR_BGR2GRAY)
-  cv.cvtColor(right, rightGray, cv.COLOR_BGR2GRAY)
+  let {
+    leftKeyPoints,
+    rightKeyPoints,
+    matches
+  } = detectAndMatch(left, right)
 
-  let leftKeyPoints = new cv.KeyPointVector()
-  let rightKeyPoints = new cv.KeyPointVector()
-
-  let leftDescriptors = new cv.Mat()
-  let rightDescriptors = new cv.Mat()
-
-  let orb = new cv.AKAZE()
-
-  orb.detectAndCompute(leftGray, new cv.Mat(), leftKeyPoints, leftDescriptors)
-  orb.detectAndCompute(rightGray, new cv.Mat(), rightKeyPoints, rightDescriptors)
-
-  let bf = new cv.BFMatcher()
-  let matches = new cv.DMatchVectorVector()
-  bf.knnMatch(leftDescriptors, rightDescriptors, matches, 2)
+  console.log("feature matched")
 
   let goodMatches = filterMatches(matches, knnDistanceOption)
   drawMatches(left, leftKeyPoints, right, rightKeyPoints, goodMatches, 'matches')
 
   let [leftPoints, rightPoints] = extractPoints(goodMatches, leftKeyPoints, rightKeyPoints)
 
-  let [xd, yd] = calculateDistances(leftPoints, rightPoints)
+  let [xd, yd] = calculateOffsets(leftPoints, rightPoints)
 
   console.log('median xd: ' + median(xd))
   console.log('median yd: ' + median(yd))
-  return
+  return [Math.round(median(xd)), Math.round(median(yd))]
 }
