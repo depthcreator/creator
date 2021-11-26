@@ -4,6 +4,8 @@ import align from './functions/align'
 
 global css html
 	ff:sans
+	bgc: #111
+	c: #eee
 
 let state = 
 	left: null
