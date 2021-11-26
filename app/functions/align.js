@@ -121,13 +121,64 @@ function getMatStats(Mat, name) {
   console.log("   depth:" + depth + " colorspace:" + baseline_colorspace + " type:" + baseline_matType)
 }
 
+function drawMatches(left, leftKeyPoints, right, rightKeyPoints, matches, canvasName) {
+  let imMatches = new cv.Mat()
+  let color = new cv.Scalar(0,255,0, 255)
+
+  cv.drawMatches(left, leftKeyPoints, right, rightKeyPoints, matches, imMatches, color)
+  cv.imshow(canvasName, imMatches)
+}
+
+function filterMatches(matches, ratio) {
+  let goodMatches = new cv.DMatchVector()
+
+  let counter = 0;
+  for (let i = 0; i < matches.size(); ++i) {
+    let match = matches.get(i);
+    let dMatch1 = match.get(0);
+    let dMatch2 = match.get(1);
+
+    if (dMatch1.distance / dMatch2.distance < ratio) {
+      goodMatches.push_back(dMatch1)
+      counter++
+    }
+  }
+  console.log(ratio)
+  console.log("keeping ", counter, " points in good_matches vector out of ", matches.size(), " contained in this match vector:", matches)
+  return goodMatches
+}
+
+function extractPoints(matches, leftKeyPoints, rightKeyPoints) {
+  let leftPoints = []
+  let rightPoints = []
+  for (let i = 0; i < matches.size(); i++) {
+    leftPoints.push(leftKeyPoints.get(matches.get(i).queryIdx).pt)
+    rightPoints.push(rightKeyPoints.get(matches.get(i).trainIdx).pt)
+  }
+
+  return [leftPoints, rightPoints]
+}
+
+function calculateDistances(leftPoints, rightPoints) {
+  let xd = []
+  let yd = []
+
+  let d = leftPoints.map((l, i) => {
+    let r = rightPoints[i]
+    xd.push(r.x - l.x)
+    yd.push(r.y - l.y)
+  })
+
+  return [xd, yd]
+}
+
 export default function align(leftElement, rightElement, knnDistanceOption) {
   // the result might differ when read from image elements of different size
   // and a display:none image element will give slightly different result comparing to a full-size element for unknown reason
   let left = cv.imread(leftElement)
-  getMatStats(left, 'original left image')
+  //getMatStats(left, 'original left image')
   let right = cv.imread(rightElement)
-  getMatStats(right, 'original right image')
+  //getMatStats(right, 'original right image')
 
   let leftGray = new cv.Mat()
   let rightGray = new cv.Mat()
@@ -146,50 +197,16 @@ export default function align(leftElement, rightElement, knnDistanceOption) {
   orb.detectAndCompute(leftGray, new cv.Mat(), leftKeyPoints, leftDescriptors)
   orb.detectAndCompute(rightGray, new cv.Mat(), rightKeyPoints, rightDescriptors)
 
-  let goodMatches = new cv.DMatchVector()
-
   let bf = new cv.BFMatcher()
   let matches = new cv.DMatchVectorVector()
   bf.knnMatch(leftDescriptors, rightDescriptors, matches, 2)
 
-  let counter = 0;
-  for (let i = 0; i < matches.size(); ++i) {
-    let match = matches.get(i);
-    let dMatch1 = match.get(0);
-    let dMatch2 = match.get(1);
+  let goodMatches = filterMatches(matches, knnDistanceOption)
+  drawMatches(left, leftKeyPoints, right, rightKeyPoints, goodMatches, 'matches')
 
-    if (dMatch1.distance / dMatch2.distance < knnDistanceOption) {
-      goodMatches.push_back(dMatch1)
-      counter++
-    }
-  }
+  let [leftPoints, rightPoints] = extractPoints(goodMatches, leftKeyPoints, rightKeyPoints)
 
-  console.log(knnDistanceOption)
-  console.log("keeping ", counter, " points in good_matches vector out of ", matches.size(), " contained in this match vector:", matches)
-
-  let imMatches = new cv.Mat()
-  let color = new cv.Scalar(0,255,0, 255)
-  /*
-  cv.drawMatches(left, leftKeyPoints, right, rightKeyPoints,
-                    goodMatches, imMatches, color)
-  cv.imshow('canvasOutput', imMatches)
-  */
-
-  let leftPoints = []
-  let rightPoints = []
-  for (let i = 0; i < goodMatches.size(); i++) {
-    leftPoints.push(leftKeyPoints.get(goodMatches.get(i).queryIdx).pt)
-    rightPoints.push(rightKeyPoints.get(goodMatches.get(i).trainIdx).pt)
-  }
-
-  let xd = []
-  let yd = []
-
-  let d = leftPoints.map((l, i) => {
-    let r = rightPoints[i]
-    xd.push(r.x - l.x)
-    yd.push(r.y - l.y)
-  })
+  let [xd, yd] = calculateDistances(leftPoints, rightPoints)
 
   console.log('median xd: ' + median(xd))
   console.log('median yd: ' + median(yd))

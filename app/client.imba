@@ -24,6 +24,7 @@ tag app
 				<p> "Right image dropbox"
 				<image-dropbox useImageCallback=(do(e) state.right = e)>
 		<align-canvas left=state.left right=state.right offset=state.offset>
+		<canvas#matches[w:100%] height=0>
 		<button @click=processAlign> "Align"
 
 imba.mount <app>

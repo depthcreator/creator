@@ -21,4 +21,4 @@ tag align-canvas
 			draw(left, right, offset)
 
 	<self>
-		<canvas$canvas[w:1000px]>
+		<canvas$canvas[w:100%] height=0>
