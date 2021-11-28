@@ -1,7 +1,7 @@
 tag image-dropbox
-	css .dropbox w:300px h:300px bd:solid bw:1px pos:relative
+	css .dropbox w:100px h:100px bd:solid bw:1px pos:relative
 		.preview max-width:100% max-height:100%
-		.input pos:absolute w:100% h:100% o:0.5
+		.input pos:absolute w:100% h:100% o:0
 		.origin d:none
 
 	prop useImageCallback

@@ -14,10 +14,10 @@ tag app
 		right: null
 		xOffset: 0
 		yOffset: 0}
+	currentTab = 'adjustment' // one of ['adjustment', 'matches']
 
-	css
-		w:1000px
-		m:0 auto
+	def copyCanvas
+		
 
 	def processAlign
 		if state.left && state.right
@@ -31,19 +31,27 @@ tag app
 				console.log(e)
 
 	<self>
-		<div[d:flex]>
-			<div>
-				<p> "Left image dropbox"
-				<image-dropbox useImageCallback=(do(e) state.left = e)>
-			<div>
-				<p> "Right image dropbox"
-				<image-dropbox useImageCallback=(do(e) state.right = e)>
-			<div>
-				<button @click=processAlign> "Load and Auto Align"
-				<button> "Load for Manually Align"
-		<adjustment-canvas alignmentState=state>
-		<canvas#matches[w:100%] height=0>
-		<div> "Preview:"
-			<preview-canvas alignmentState=state>
+		<global>
+			<canvas#matches[w:0 h:0]>
 
+		<div[d:flex h:100%]>
+			<div[d:flex flg:1 fld:column]>
+				<div>
+					<p> "Left image dropbox"
+					<image-dropbox useImageCallback=(do(e) state.left = e)>
+				<div>
+					<p> "Right image dropbox"
+					<image-dropbox useImageCallback=(do(e) state.right = e)>
+				<div>
+					<button @click=processAlign> "Load and Auto Align"
+			<div[w:1000px d:flex fld:column h:100%]>
+				<div[h:50%]> "Preview:"
+					<preview-canvas alignmentState=state>
+
+				<div[h:50%]> "Adjustment:"
+					<adjustment-canvas alignmentState=state>
+		
+			<div[flg:1]>
+				<button> "Save"
+			
 imba.mount <app>

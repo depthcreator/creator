@@ -5,8 +5,6 @@ tag adjustment-canvas
 	prop yOffset
 	prop alignmentState
 
-	widthInCanvas = 700
-
 	def draw(left, right, xOffset, yOffset)
 		$canvas.width = left.width
 		$canvas.height = left.height
@@ -36,6 +34,25 @@ tag adjustment-canvas
 				e.preventDefault!
 				alignmentState.xOffset +=1
 
+	dragging = false
+	startingPoint
+	startingOffset
+
+	def mousedown e
+		if e.which == 1
+			dragging = true
+			startingPoint = {x: e.screenX, y: e.screenY}
+			startingOffset = {x: alignmentState.xOffset, y: alignmentState.yOffset}
+
+	def mouseup
+		dragging = false
+
+	def mousemove e
+		if dragging
+			ratio = $canvas.width / $canvas.clientWidth
+			alignmentState.xOffset = startingOffset.x + Math.round((e.screenX - startingPoint.x) * ratio)
+			alignmentState.yOffset = startingOffset.y + Math.round((e.screenY - startingPoint.y) * ratio)
+
 	<self>
 		<global @keydown=keydown>
-		<canvas$canvas[w:100%] height=0>
+		<canvas$canvas[w:100% cursor:move] height=0 @mousedown=mousedown @mousemove=mousemove @mouseup=mouseup>
