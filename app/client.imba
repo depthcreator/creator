@@ -109,8 +109,8 @@ tag app
 			<canvas#matches[w:0 h:0]>
 			<canvas$forSave[w:0 h:0]>
 
-		<div[d:flex h:100% max-width:1500px m:0 auto]>
-			<div[w:15%]>
+		<div[d:flex h:100% max-width:1500px jc:center m:0 auto]>
+			<div[max-width:230px min-width:120px flg:1]>
 				<title-box title="Image Dropbox">
 					<div[d:flex flw:wrap]>
 						<div>
@@ -133,14 +133,14 @@ tag app
 				<title-box title="Links">
 					<div[ml:5px]>
 						<a href="https://github.com/depthgallery/creator" target="_blank"> <p> "GitHub Repo"
-			<div[max-width:1000px flg:1]>
+			<div[max-width:1000px min-width:300px flg:5]>
 				<title-box title="Result Image">
 					<preview-canvas alignmentState=state>
 
 				<title-box title="Adjustment">
 					<adjustment-canvas alignmentState=state>
 		
-			<div[w:15%]>
+			<div[flg:1 min-width:120px max-width:230px]>
 				<title-box title="Logs">
 					<div$logs[of:auto h:300px ml:5px fs:0.8rem]>
 				<title-box title="Alignment Detail">
