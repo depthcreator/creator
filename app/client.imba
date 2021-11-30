@@ -10,6 +10,20 @@ global css html
 	c: #fff
 	font-family: Helvetica, Arial, sans-serif
 
+global css button
+	bd: 1px solid indigo5
+	background-color: indigo7
+	box-shadow: rgb(0 0 0 / 20%) 0px 2px 4px -1px, rgb(0 0 0 / 14%) 0px 4px 5px 0px, rgb(0 0 0 / 12%) 0px 1px 10px 0px
+	c: #fff
+	ta: center
+	p: 8px
+	fs: 0.9rem
+	mt: 10px
+global css button@hover
+	bgc: indigo5
+global css button@active
+	bgc: indigo7
+
 tag app
 	state = {
 		left: null
@@ -35,7 +49,14 @@ tag app
 				console.log(e)
 
 	def metadata state
-		JSON.stringify({leftName: state.leftName, rightName: state.rightName, xOffset: state.xOffset, yOffset: state.yOffset})
+		"""
+		\{
+		  "left": "{state.leftName}",
+		  "right": "{state.rightName}",
+		  "xOffset": {state.xOffset},
+		  "yOffset": {state.yOffset}
+		\}
+		"""
 
 	def reset
 		state.left = null
@@ -43,7 +64,19 @@ tag app
 		state.leftName = ""
 		state.rightName = ""
 		state.xOffset = 0
-		state.rightName = 0
+		state.yOffset = 0
+
+	def swap
+		[state.left, state.right] = [state.right, state.left]
+		[state.leftName, state.rightName] = [state.rightName, state.leftName]
+		state.xOffset = -state.xOffset
+		state.yOffset = -state.yOffset
+
+	def viewStatus
+		if state.xOffset >= 0
+			'ParallelView'
+		else
+			'CrossView'
 
 	<self>
 		<global>
@@ -66,6 +99,9 @@ tag app
 				<title-box title="Functions">
 					<div>
 						<button @click=processAlign> "Automatic align"
+						<button @click=swap>
+							<div> "Left-right swap"
+							<div> "(currently {viewStatus!})"
 			<div[max-width:1000px flg:1]>
 				<title-box title="Preview">
 					<preview-canvas alignmentState=state>
