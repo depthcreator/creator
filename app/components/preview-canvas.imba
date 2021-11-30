@@ -27,6 +27,8 @@ tag preview-canvas
 			let maxHeight = 300
 			$container.style.maxHeight = maxHeight
 			$preview.style.width = calculateCanvasWidth($widthHolder.clientWidth, maxHeight, $preview)
+		else
+			$preview.height = 0
 
 	<self>
 		<div$container[pos:relative ta:center h:300px]>

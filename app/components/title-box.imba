@@ -12,9 +12,8 @@ tag title-box
 
 	css .title
 		margin: 0px 0px 0.35em
-		font-family: Roboto, Helvetica, Arial, sans-serif
 		font-weight: 400
-		font-size: 1.2rem
+		font-size: 1.1rem
 		line-height: 1.334
 		letter-spacing: 0em
 		padding: 16px 16px 0px

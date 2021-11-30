@@ -5,15 +5,21 @@ tag image-dropbox
 		.origin d:none
 
 	prop useImageCallback
+	prop image
 
 	def useImage(e)
-		let url = URL.createObjectURL(e.target.files[0])
-		$preview.src = url
+		let file = e.target.files[0]
+		let url = URL.createObjectURL(file)
 		$origin.src = url
 		$origin.onload = do
-			console.log("onload")
-			useImageCallback($origin)
+			useImageCallback($origin, file)
 			imba.commit!
+
+	def rendered
+		if image && image.src
+			$preview.src = image.src
+		else
+			$preview.src = ""
 
 	<self.dropbox>
 		<input.input type="file" @change=(useImage)>

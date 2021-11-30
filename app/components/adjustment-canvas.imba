@@ -18,6 +18,8 @@ tag adjustment-canvas
 	def rendered
 		if alignmentState.left && alignmentState.right
 			draw(alignmentState.left, alignmentState.right, alignmentState.xOffset, alignmentState.yOffset)
+		else
+			$canvas.height = 0
 
 	def keydown e
 		switch e.key
