@@ -24,6 +24,9 @@ global css button@hover
 global css button@active
 	bgc: indigo7
 
+global css a
+	c: #fff
+
 tag app
 	state = {
 		left: null
@@ -84,7 +87,7 @@ tag app
 
 		<div[d:flex h:100% max-width:1500px m:0 auto]>
 			<div[w:15%]>
-				<title-box title="Image dropbox">
+				<title-box title="Image Dropbox">
 					<div[d:flex flw:wrap]>
 						<div>
 							<p> "Left"
@@ -102,8 +105,12 @@ tag app
 						<button @click=swap>
 							<div> "Left-right swap"
 							<div> "(currently {viewStatus!})"
+
+				<title-box title="Links">
+					<div[ml:5px]>
+						<a href="https://github.com/depthgallery/creator" target="_blank"> <p> "GitHub Repo"
 			<div[max-width:1000px flg:1]>
-				<title-box title="Preview">
+				<title-box title="Result Image">
 					<preview-canvas alignmentState=state>
 
 				<title-box title="Adjustment">
@@ -111,9 +118,11 @@ tag app
 		
 			<div[w:15%]>
 				<title-box title="Logs">
-				<title-box title="Alignment Data">
+				<title-box title="Alignment Detail">
 					<pre[ws:pre-wrap word-break:break-word]> metadata(state)
 				<title-box title="Export">
-					<button> "Save"
+					<div[ml:5px]>
+						<p> "You can just copy or save the result image."
+						<p> "It will be of the origianl resolution."
 			
 imba.mount <app>
