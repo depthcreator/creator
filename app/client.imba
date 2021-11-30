@@ -1,12 +1,13 @@
 import './components/image-dropbox'
 import './components/adjustment-canvas'
 import './components/preview-canvas'
+import './components/title-box'
 import align from './functions/align'
 
 global css html
 	ff:sans
-	bgc: #111
-	c: #eee
+	bgc: rgb(32, 38, 45)
+	c: #fff
 
 tag app
 	state = {
@@ -36,19 +37,20 @@ tag app
 
 		<div[d:flex h:100%]>
 			<div[d:flex flg:1 fld:column]>
+				<title-box title="Image dropbox">
+					<div>
+						<p> "Left image dropbox"
+						<image-dropbox useImageCallback=(do(e) state.left = e)>
+					<div>
+						<p> "Right image dropbox"
+						<image-dropbox useImageCallback=(do(e) state.right = e)>
 				<div>
-					<p> "Left image dropbox"
-					<image-dropbox useImageCallback=(do(e) state.left = e)>
-				<div>
-					<p> "Right image dropbox"
-					<image-dropbox useImageCallback=(do(e) state.right = e)>
-				<div>
-					<button @click=processAlign> "Load and Auto Align"
-			<div[w:1000px d:flex fld:column h:100%]>
-				<div[h:50%]> "Preview:"
+					<button @click=processAlign> "Automatic align"
+			<div[w:1000px]>
+				<title-box title="Preview">
 					<preview-canvas alignmentState=state>
 
-				<div[h:50%]> "Adjustment:"
+				<title-box title="Adjustment">
 					<adjustment-canvas alignmentState=state>
 		
 			<div[flg:1]>

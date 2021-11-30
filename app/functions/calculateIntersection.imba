@@ -9,7 +9,7 @@ export default def calculateIntersection(left, right, xOffset, yOffset)
 	else
 		leftRect.x = 0
 		leftRect.w = right.width + xOffset
-		rightRect.x = xOffset
+		rightRect.x = -xOffset
 		rightRect.w = leftRect.w
 	if yOffset > 0
 		leftRect.y = yOffset
@@ -19,6 +19,6 @@ export default def calculateIntersection(left, right, xOffset, yOffset)
 	else
 		leftRect.y = 0
 		leftRect.h = right.height + yOffset
-		rightRect.y = yOffset
+		rightRect.y = -yOffset
 		rightRect.h = leftRect.h
 	[leftRect, rightRect]
