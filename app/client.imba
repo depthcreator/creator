@@ -37,9 +37,6 @@ tag app
 		yOffset: 0}
 	currentTab = 'adjustment' // one of ['adjustment', 'matches']
 
-	def copyCanvas
-		
-
 	def processAlign
 		if state.left && state.right
 			try
@@ -88,9 +85,29 @@ tag app
 			<div> message
 		$logs.scrollTo(0, 100000)
 
+	def downloadJPEG
+		let canvas\HTMLCanvasElement = document.querySelector("canvas#preview")
+		let a = <a href=(canvas.toDataURL("image/jpeg")) download="{state.leftName}_{state.rightName}.jpg">
+		a.click!
+
+	def downloadSeparateJPEG
+		let canvas\HTMLCanvasElement = document.querySelector("canvas#preview")
+		let context = $forSave.getContext('2d')
+		let width = canvas.width / 2
+		let height = canvas.height
+		$forSave.width = width
+		$forSave.height = height
+		context.drawImage(canvas, 0, 0, width, height, 0, 0, width, height)
+		let leftData = $forSave.toDataURL("image/jpeg")
+		context.drawImage(canvas, width, 0, width, height, 0, 0, width, height)
+		let rightData = $forSave.toDataURL("image/jpeg")
+		(<a href=(leftData) download="{state.leftName}_{state.rightName}_left.jpg">).click!
+		(<a href=(rightData) download="{state.leftName}_{state.rightName}_right.jpg">).click!
+
 	<self>
 		<global>
 			<canvas#matches[w:0 h:0]>
+			<canvas$forSave[w:0 h:0]>
 
 		<div[d:flex h:100% max-width:1500px m:0 auto]>
 			<div[w:15%]>
@@ -130,7 +147,8 @@ tag app
 					<pre[ws:pre-wrap word-break:break-word]> metadata(state)
 				<title-box title="Export">
 					<div[ml:5px]>
-						<p> "You can just copy or save the result image."
-						<p> "It will be of the origianl resolution."
+						<p> "You can also directly copy the result image."
+						<button @click=downloadJPEG> "Download JPEG"
+						<button @click=downloadSeparateJPEG> "Download Separate JPEG"
 			
 imba.mount <app>

@@ -33,4 +33,4 @@ tag preview-canvas
 	<self>
 		<div$container[pos:relative ta:center h:300px]>
 			<div$widthHolder[w:100%]>
-			<canvas$preview height=0>
+			<canvas$preview#preview height=0>
