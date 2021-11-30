@@ -68,18 +68,25 @@ tag app
 		state.rightName = ""
 		state.xOffset = 0
 		state.yOffset = 0
+		log "User: Dropbox reset"
 
 	def swap
 		[state.left, state.right] = [state.right, state.left]
 		[state.leftName, state.rightName] = [state.rightName, state.leftName]
 		state.xOffset = -state.xOffset
 		state.yOffset = -state.yOffset
+		log "User: Left-right swap"
 
 	def viewStatus
 		if state.xOffset >= 0
 			'ParallelView'
 		else
 			'CrossView'
+
+	def log message
+		$logs.appendChild
+			<div> message
+		$logs.scrollTo(0, 100000)
 
 	<self>
 		<global>
@@ -118,6 +125,7 @@ tag app
 		
 			<div[w:15%]>
 				<title-box title="Logs">
+					<div$logs[of:auto h:300px ml:5px fs:0.8rem]>
 				<title-box title="Alignment Detail">
 					<pre[ws:pre-wrap word-break:break-word]> metadata(state)
 				<title-box title="Export">
