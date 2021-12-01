@@ -1,0 +1,10 @@
+npm run build
+cd dist
+rm -rf .git
+git init
+git add .
+git commit -m 'deploy'
+git remote add origin git@github.com:depthgallery/creator.git
+git push origin master:gh-pages -f
+rm -rf .git
+cd ..

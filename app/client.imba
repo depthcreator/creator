@@ -111,22 +111,23 @@ tag app
 			<canvas$forSave[w:0 h:0]>
 
 		<div[d:flex h:100% max-width:1500px jc:center m:0 auto]>
-			<div[max-width:230px min-width:120px flg:1]>
+			<div[max-width:240px min-width:120px flg:1]>
 				<title-box title="Image Dropbox">
-					<div[d:flex flw:wrap]>
+					<div[d:flex flw:wrap pl:5px pr:5px]>
 						<div>
 							<p> "Left"
 							<image-dropbox image=state.left useImageCallback=(do(e, f) (state.left = e, state.leftName = f.name))>
 						<div>
 							<p> "Right"
 							<image-dropbox image=state.right useImageCallback=(do(e, f) (state.right = e, state.rightName = f.name))>
-					<div>
+					<div[ml:5px]>
 						<button @click=reset> "Reset"
 
 
 				<title-box title="Functions">
-					<div>
+					<div[ml:5px]>
 						<button @click=processAlign> "Automatic align"
+						<br>
 						<button @click=swap>
 							<div> "Left-right swap"
 							<div> "(currently {viewStatus!})"
@@ -141,15 +142,15 @@ tag app
 				<title-box title="Adjustment">
 					<adjustment-canvas alignmentState=state>
 		
-			<div[flg:1 min-width:120px max-width:230px]>
+			<div[flg:1 min-width:120px max-width:240px]>
 				<title-box title="Logs">
 					<div$logs[of:auto h:300px ml:5px fs:0.8rem]>
 				<title-box title="Alignment Detail">
 					<pre[ws:pre-wrap word-break:break-word]> metadata(state)
 				<title-box title="Export">
 					<div[ml:5px]>
-						<p> "You can also directly copy the result image."
 						<button @click=downloadJPEG> "Download JPEG"
 						<button @click=downloadSeparateJPEG> "Download Separate JPEG"
+						<p> "You can also directly copy the result image."
 			
 imba.mount <app>
