@@ -6,7 +6,6 @@ tag preview-canvas
 	def drawPreview canvas, left, right, xOffset, yOffset
 		let context = canvas.getContext('2d')
 		let [leftRect, rightRect] = calculateIntersection(left, right, xOffset, yOffset)
-		console.log([leftRect, rightRect], [xOffset, yOffset])
 		canvas.width = leftRect.w * 2
 		canvas.height = leftRect.h
 		context.drawImage(left, leftRect.x, leftRect.y, leftRect.w, leftRect.h, 0, 0, leftRect.w, leftRect.h)

@@ -40,13 +40,14 @@ tag app
 	def processAlign
 		if state.left && state.right
 			try
-				let [xOffset, yOffset] = align(state.left, state.right, 0.5)
+				log("User: Automatic align")
+				let [xOffset, yOffset] = align(state.left, state.right, 0.7)
 				console.log(xOffset, yOffset)
 				state.xOffset = xOffset
 				state.yOffset = yOffset
 			catch e
 				// if the matching process die, it is not rescueable
-				console.log(e)
+				window.alert(e)
 
 	def metadata state
 		"""

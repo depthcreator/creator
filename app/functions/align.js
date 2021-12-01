@@ -185,7 +185,8 @@ function detectAndMatch(leftMat, rightMat) {
   let leftDescriptors = new cv.Mat()
   let rightDescriptors = new cv.Mat()
 
-  let orb = new cv.AKAZE()
+  //let orb = new cv.AKAZE()
+  let orb = new cv.ORB()
 
   // too large dimensions causes it to blow
   orb.detectAndCompute(leftGray, new cv.Mat(), leftKeyPoints, leftDescriptors)
