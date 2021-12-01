@@ -139,7 +139,7 @@ tag app
 				<title-box title="Result Image">
 					<preview-canvas alignmentState=state>
 
-				<title-box title="Adjustment">
+				<title-box title="Adjustment (by mouse or arrow keys)">
 					<adjustment-canvas alignmentState=state>
 		
 			<div[flg:1 min-width:120px max-width:240px]>

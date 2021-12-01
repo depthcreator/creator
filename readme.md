@@ -1,19 +1,7 @@
-# Getting Started
+Usage
+======
 
-This project was bootstrapped with [imba-base-template](https://github.com/imba/imba-base-template).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.
-You will also see any lint errors in the console.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.
+1. Drop photos into "Image Dropbox"
+2. (Optional) Click "Automatic align"
+3. Use mouse or arrow keys to adjust the aligned image on the "Adjustment" area
+4. Copy or download the result image
