@@ -1,3 +1,8 @@
+Stereo Photo Creator
+======
+
+A tool to combine and align your pair of photos to create a stereo one in the browser.
+
 Usage
 ======
 
