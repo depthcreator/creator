@@ -1,6 +1,8 @@
 <template>
-  <canvas id="matches" style="width: 0; height: 0;"></canvas>
-  <canvas ref="forSave" style="width: 0; height: 0;"></canvas>
+  <div class="hidden-canvas">
+    <canvas id="matches" style="width: 0; height: 0;"></canvas>
+    <canvas ref="forSave" style="width: 0; height: 0;"></canvas>
+  </div>
   <main>
     <section class="first-column">
       <TitleBox title="Image Dropbox">
@@ -120,6 +122,9 @@ function downloadSeparateJPEG() {
 </script>
 
 <style scoped lang="scss">
+.hidden-canvas {
+  height: 0;
+}
 main {
   display: flex;
   height: 100%;
