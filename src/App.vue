@@ -1,4 +1,5 @@
 <template>
+  <canvas id="matches" style="width: 0; height: 0;"></canvas>
   <main>
     <section class="first-column">
       <TitleBox title="Image Dropbox">
@@ -39,7 +40,7 @@
         <PreviewCanvas :alignmentState="state"/>
       </TitleBox>
       <TitleBox title="Adjustment (by mouse or arrow keys)">
-        <AdjustmentCanvas/>
+        <AdjustmentCanvas :alignmentState="state"/>
       </TitleBox>
     </section>
     <section class="third-column">
