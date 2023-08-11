@@ -66,14 +66,6 @@ export default function useAlignmentState(log: (message: string) => void) {
 
   const viewStatus = computed(() => state.xOffset >= 0 ? 'ParallelView' : 'CrossView')
 
-  function downloadJPEG() {
-
-  }
-
-  function downloadSeparateJPEG() {
-
-  }
-
   function setImage(name: 'left' | 'right', image: HTMLImageElement, file: File) {
     state[name] = image
     state[`${name}Name`] = file.name
@@ -86,8 +78,6 @@ export default function useAlignmentState(log: (message: string) => void) {
     reset,
     swap,
     viewStatus,
-    downloadJPEG,
-    downloadSeparateJPEG,
     setImage,
   }
 }

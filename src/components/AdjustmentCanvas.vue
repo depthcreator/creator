@@ -81,9 +81,11 @@ function mousedown(e: MouseEvent) {
     startingOffset.value = {x: props.alignmentState.xOffset, y: props.alignmentState.yOffset}
   }
 }
+
 function mouseup() {
   dragging.value = false
 }
+
 function mousemove(e: MouseEvent) {
   if (dragging.value) {
     let ratio = canvas.value!.width / canvas.value!.clientWidth
@@ -91,9 +93,6 @@ function mousemove(e: MouseEvent) {
     props.alignmentState.yOffset = startingOffset.value.y + Math.round((e.screenY - startingPoint.value.y) * ratio)
   }
 }
-
-
-
 </script>
 
 <style scoped lang="scss">

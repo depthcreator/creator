@@ -1,5 +1,6 @@
 <template>
   <canvas id="matches" style="width: 0; height: 0;"></canvas>
+  <canvas ref="forSave" style="width: 0; height: 0;"></canvas>
   <main>
     <section class="first-column">
       <TitleBox title="Image Dropbox">
@@ -73,6 +74,13 @@ import AdjustmentCanvas from './components/AdjustmentCanvas.vue'
 
 const logs = ref(null as HTMLDivElement | null)
 
+const forSave = ref(null as HTMLCanvasElement | null)
+
+function log(message: string) {
+  logs.value!.innerHTML += `<div>${message}</div>`
+  logs.value!.scrollTo(0, 100000)
+}
+
 const {
   state,
   processAlign,
@@ -80,13 +88,35 @@ const {
   reset,
   swap,
   viewStatus,
-  downloadJPEG,
-  downloadSeparateJPEG,
   setImage,
-} = useAlignmentState(function(message: string) {
-  logs.value!.innerHTML += `<div>${message}</div>`
-  logs.value!.scrollTo(0, 100000)
-})
+} = useAlignmentState(log)
+
+function download(href: string, filename: string) {
+  let a = document.createElement('a')
+  a.href = href
+  a.download = filename
+  a.click()
+}
+
+function downloadJPEG() {
+  let canvas = document.querySelector("canvas#preview") as HTMLCanvasElement
+  download(canvas.toDataURL("image/jpeg"), `${state.leftName}_${state.rightName}.jpg`)
+}
+
+function downloadSeparateJPEG() {
+  let canvas = document.querySelector("canvas#preview") as HTMLCanvasElement
+  let context = forSave.value!.getContext('2d')!
+  let width = canvas.width / 2
+  let height = canvas.height
+  forSave.value!.width = width
+  forSave.value!.height = height
+  context.drawImage(canvas, 0, 0, width, height, 0, 0, width, height)
+  let leftData = forSave.value!.toDataURL("image/jpeg")
+  context.drawImage(canvas, width, 0, width, height, 0, 0, width, height)
+  let rightData = forSave.value!.toDataURL("image/jpeg")
+  download(leftData, `${state.leftName}_${state.rightName}_left.jpg`)
+  download(rightData, `${state.leftName}_${state.rightName}_right.jpg`)
+}
 </script>
 
 <style scoped lang="scss">
