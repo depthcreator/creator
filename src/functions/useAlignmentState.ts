@@ -1,4 +1,4 @@
-import { reactive, computed, ref } from "vue"
+import { reactive, computed, ref, nextTick } from "vue"
 import align from "./align"
 
 interface AlignmentState {
@@ -67,8 +67,13 @@ export default function useAlignmentState(log: (message: string) => void) {
   const viewStatus = computed(() => state.xOffset >= 0 ? 'ParallelView' : 'CrossView')
 
   function setImage(name: 'left' | 'right', image: HTMLImageElement, file: File) {
-    state[name] = image
-    state[`${name}Name`] = file.name
+    // Since the image element doesn't change when assigned a new src,
+    // we need to set it null for vue to pick up the change.
+    state[name] = null
+    nextTick(() => {
+      state[name] = image
+      state[`${name}Name`] = file.name
+    })
   }
 
   return {
