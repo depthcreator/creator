@@ -1,5 +1,4 @@
 <template>
-  <MigrationNotice/>
   <div class="hidden-canvas">
     <canvas id="matches" style="width: 0; height: 0;"></canvas>
     <canvas ref="forSave" style="width: 0; height: 0;"></canvas>
@@ -74,7 +73,6 @@ import ImageDropbox from './components/ImageDropbox.vue'
 import useAlignmentState from './functions/useAlignmentState'
 import PreviewCanvas from './components/PreviewCanvas.vue'
 import AdjustmentCanvas from './components/AdjustmentCanvas.vue'
-import MigrationNotice from './components/MigrationNotice.vue'
 
 const logs = ref(null as HTMLDivElement | null)
 
