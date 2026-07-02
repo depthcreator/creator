@@ -159,6 +159,79 @@ function extractPoints(matches, leftKeyPoints, rightKeyPoints) {
   return [leftPoints, rightPoints]
 }
 
+// Estimates a rigid-body transform (rotation + translation, scale locked to 1)
+// mapping right points onto left points. opencv.js does not ship a rigid-body
+// estimator, so RANSAC (via estimateAffine2D) rejects outlier matches first,
+// then the optimal scale=1 rotation is solved on the inliers (Kabsch).
+// The rotation is anchored at the right image center, so xOffset/yOffset stay
+// comparable to the translation-only values the UI always used.
+// Returns null when there are not enough usable matches.
+function estimateRigidTransform(leftPoints, rightPoints, center) {
+  let n = rightPoints.length
+  if (n < 3) return null
+
+  let srcData = []
+  let dstData = []
+  for (let i = 0; i < n; i++) {
+    srcData.push(rightPoints[i].x, rightPoints[i].y)
+    dstData.push(leftPoints[i].x, leftPoints[i].y)
+  }
+  let srcMat = cv.matFromArray(n, 1, cv.CV_32FC2, srcData)
+  let dstMat = cv.matFromArray(n, 1, cv.CV_32FC2, dstData)
+  let inlierMask = new cv.Mat()
+  let M = cv.estimateAffine2D(srcMat, dstMat, inlierMask, cv.RANSAC, 3, 2000, 0.99, 10)
+
+  let src = []
+  let dst = []
+  if (!M.empty()) {
+    for (let i = 0; i < n; i++) {
+      if (inlierMask.data[i]) {
+        src.push(rightPoints[i])
+        dst.push(leftPoints[i])
+      }
+    }
+  }
+  srcMat.delete()
+  dstMat.delete()
+  inlierMask.delete()
+  M.delete()
+  console.log("RANSAC kept " + src.length + " inliers out of " + n + " matches")
+  if (src.length < 2) return null
+
+  let sc = {x: 0, y: 0}
+  let dc = {x: 0, y: 0}
+  for (let i = 0; i < src.length; i++) {
+    sc.x += src[i].x / src.length
+    sc.y += src[i].y / src.length
+    dc.x += dst[i].x / dst.length
+    dc.y += dst[i].y / dst.length
+  }
+
+  let sinSum = 0
+  let cosSum = 0
+  for (let i = 0; i < src.length; i++) {
+    let sx = src[i].x - sc.x
+    let sy = src[i].y - sc.y
+    let dx = dst[i].x - dc.x
+    let dy = dst[i].y - dc.y
+    sinSum += sx * dy - sy * dx
+    cosSum += sx * dx + sy * dy
+  }
+  let angle = Math.atan2(sinSum, cosSum)
+  let cos = Math.cos(angle)
+  let sin = Math.sin(angle)
+
+  // t = dc − R·sc, then re-anchored so the rotation pivots at the image center
+  let tx = dc.x - (cos * sc.x - sin * sc.y) + (cos * center.x - sin * center.y - center.x)
+  let ty = dc.y - (sin * sc.x + cos * sc.y) + (sin * center.x + cos * center.y - center.y)
+
+  return {
+    xOffset: Math.round(tx),
+    yOffset: Math.round(ty),
+    rotation: Math.round(angle * 180 / Math.PI * 100) / 100
+  }
+}
+
 function calculateOffsets(leftPoints, rightPoints) {
   let xd = []
   let yd = []
@@ -229,9 +302,16 @@ export default function align(leftElement, rightElement, knnDistanceOption) {
 
   let [leftPoints, rightPoints] = extractPoints(goodMatches, leftKeyPoints, rightKeyPoints)
 
+  let rigid = estimateRigidTransform(leftPoints, rightPoints, {x: right.cols / 2, y: right.rows / 2})
+  if (rigid) {
+    console.log('rigid transform: ', rigid)
+    return rigid
+  }
+
+  // fallback: translation-only estimate from the match offset medians
   let [xd, yd] = calculateOffsets(leftPoints, rightPoints)
 
   console.log('median xd: ' + median(xd))
   console.log('median yd: ' + median(yd))
-  return [Math.round(median(xd)), Math.round(median(yd))]
+  return {xOffset: Math.round(median(xd)), yOffset: Math.round(median(yd)), rotation: 0}
 }

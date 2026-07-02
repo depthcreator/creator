@@ -16,6 +16,7 @@ interface AlignmentState {
   rightName: string
   xOffset: number
   yOffset: number
+  rotation: number
 }
 
 const props = defineProps<{
@@ -26,13 +27,25 @@ const container = ref(null as HTMLDivElement | null)
 const widthHolder = ref(null as HTMLDivElement | null)
 const preview = ref(null as HTMLCanvasElement | null)
 
-function drawPreview(canvas: HTMLCanvasElement, left: HTMLImageElement, right: HTMLImageElement, xOffset: number, yOffset: number) {
+function drawPreview(canvas: HTMLCanvasElement, left: HTMLImageElement, right: HTMLImageElement, xOffset: number, yOffset: number, rotation: number) {
   let context = canvas.getContext('2d')!
   let [leftRect, rightRect] = calculateIntersection(left, right, xOffset, yOffset)
   canvas.width = leftRect.w * 2
   canvas.height = leftRect.h
   context.drawImage(left, leftRect.x, leftRect.y, leftRect.w, leftRect.h, 0, 0, leftRect.w, leftRect.h)
-  context.drawImage(right, rightRect.x, rightRect.y, rightRect.w, rightRect.h, leftRect.w, 0, leftRect.w, leftRect.h)
+  if (rotation === 0) {
+    context.drawImage(right, rightRect.x, rightRect.y, rightRect.w, rightRect.h, leftRect.w, 0, leftRect.w, leftRect.h)
+  } else {
+    // same crop, but rotating the right image about its own center first
+    context.save()
+    context.beginPath()
+    context.rect(leftRect.w, 0, leftRect.w, leftRect.h)
+    context.clip()
+    context.translate(leftRect.w - rightRect.x + right.width / 2, -rightRect.y + right.height / 2)
+    context.rotate(rotation * Math.PI / 180)
+    context.drawImage(right, -right.width / 2, -right.height / 2)
+    context.restore()
+  }
 }
 
 function calculateHeight(left: HTMLImageElement, right: HTMLImageElement) {
@@ -48,7 +61,7 @@ function calculateCanvasWidth(maxWidth: number, maxHeight: number, canvas: HTMLC
 onMounted(() => {
   watchEffect(() => {
     if (props.alignmentState.left && props.alignmentState.right) {
-      drawPreview(preview.value!, props.alignmentState.left, props.alignmentState.right, props.alignmentState.xOffset, props.alignmentState.yOffset)
+      drawPreview(preview.value!, props.alignmentState.left, props.alignmentState.right, props.alignmentState.xOffset, props.alignmentState.yOffset, props.alignmentState.rotation)
       //let maxHeight = calculateHeight(props.alignmentState.left, props.alignmentState.right)
       let maxHeight = 300
       container.value!.style.maxHeight = `${maxHeight}px`

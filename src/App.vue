@@ -42,7 +42,7 @@
       <TitleBox title="Result Image">
         <PreviewCanvas :alignmentState="state"/>
       </TitleBox>
-      <TitleBox title="Adjustment (by mouse or arrow keys)">
+      <TitleBox title="Adjustment (mouse or arrow keys; Q/E to rotate)">
         <AdjustmentCanvas :alignmentState="state"/>
       </TitleBox>
     </section>

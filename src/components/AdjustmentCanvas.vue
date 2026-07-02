@@ -12,6 +12,7 @@ interface AlignmentState {
   rightName: string
   xOffset: number
   yOffset: number
+  rotation: number
 }
 
 const props = defineProps<{
@@ -20,7 +21,7 @@ const props = defineProps<{
 
 const canvas = ref(null as HTMLCanvasElement | null)
 
-function draw(left: HTMLImageElement, right: HTMLImageElement, xOffset: number, yOffset: number) {
+function draw(left: HTMLImageElement, right: HTMLImageElement, xOffset: number, yOffset: number, rotation: number) {
   canvas.value!.width = left.width
   canvas.value!.height = left.height
 
@@ -28,13 +29,17 @@ function draw(left: HTMLImageElement, right: HTMLImageElement, xOffset: number, 
   context.globalAlpha = 0.5
 
   context.drawImage(left, 0, 0, left.width, left.height, 0, 0, left.width, left.height)
-  context.drawImage(right, 0, 0, right.width, right.height, xOffset, yOffset, right.width, right.height)
+  context.save()
+  context.translate(xOffset + right.width / 2, yOffset + right.height / 2)
+  context.rotate(rotation * Math.PI / 180)
+  context.drawImage(right, -right.width / 2, -right.height / 2)
+  context.restore()
 }
 
 onMounted(() => {
   watchEffect(() => {
     if (props.alignmentState.left && props.alignmentState.right) {
-      draw(props.alignmentState.left, props.alignmentState.right, props.alignmentState.xOffset, props.alignmentState.yOffset)
+      draw(props.alignmentState.left, props.alignmentState.right, props.alignmentState.xOffset, props.alignmentState.yOffset, props.alignmentState.rotation)
     } else {
       canvas.value!.height = 0
     }
@@ -60,6 +65,12 @@ function keydown(e: KeyboardEvent) {
     case 'ArrowRight':
       e.preventDefault()
       props.alignmentState.xOffset +=1
+      break
+    case 'q':
+      props.alignmentState.rotation = Math.round((props.alignmentState.rotation - 0.1) * 100) / 100
+      break
+    case 'e':
+      props.alignmentState.rotation = Math.round((props.alignmentState.rotation + 0.1) * 100) / 100
       break
   }
 }

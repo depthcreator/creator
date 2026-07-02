@@ -8,6 +8,7 @@ interface AlignmentState {
   rightName: string
   xOffset: number
   yOffset: number
+  rotation: number
 }
 
 export default function useAlignmentState(log: (message: string) => void) {
@@ -17,17 +18,19 @@ export default function useAlignmentState(log: (message: string) => void) {
     leftName: "",
     rightName: "",
     xOffset: 0,
-    yOffset: 0
+    yOffset: 0,
+    rotation: 0
   } as AlignmentState)
 
   function processAlign() {
     if (state.left && state.right) {
       try {
         log("User: Automatic align")
-        let [xOffset, yOffset] = align(state.left, state.right, 0.7)
-        console.log(xOffset, yOffset)
+        let {xOffset, yOffset, rotation} = align(state.left, state.right, 0.7)
+        console.log(xOffset, yOffset, rotation)
         state.xOffset = xOffset
         state.yOffset = yOffset
+        state.rotation = rotation
       } catch(e) {
         // if the matching process die, it is not rescueable
         window.alert(e)
@@ -39,7 +42,8 @@ export default function useAlignmentState(log: (message: string) => void) {
   "left": "${state.leftName}",
   "right": "${state.rightName}",
   "xOffset": ${state.xOffset},
-  "yOffset": ${state.yOffset}
+  "yOffset": ${state.yOffset},
+  "rotation": ${state.rotation}
 }`)
 
   function reset() {
@@ -49,6 +53,7 @@ export default function useAlignmentState(log: (message: string) => void) {
     state.rightName = ""
     state.xOffset = 0
     state.yOffset = 0
+    state.rotation = 0
     log("User: Dropbox reset")
   }
 
@@ -61,6 +66,9 @@ export default function useAlignmentState(log: (message: string) => void) {
     state.rightName = tempName
     state.xOffset = -state.xOffset
     state.yOffset = -state.yOffset
+    // exact only when rotation pivots match; close enough for the small
+    // angles stereo pairs have — rerun Automatic align for a precise result
+    state.rotation = -state.rotation
     log("User: Left-right swap")
   }
 
