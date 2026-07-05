@@ -1,7 +1,6 @@
 <template>
   <div class="hidden-canvas">
     <canvas id="matches" style="width: 0; height: 0;"></canvas>
-    <canvas ref="forSave" style="width: 0; height: 0;"></canvas>
   </div>
   <main>
     <section class="first-column">
@@ -76,12 +75,11 @@ import TitleBox from './components/TitleBox.vue'
 import ImageDropbox from './components/ImageDropbox.vue'
 import useAlignmentState from './functions/useAlignmentState'
 import { useOpenCV } from './functions/opencv'
+import { renderResult, extractHalf } from './functions/renderResult'
 import PreviewCanvas from './components/PreviewCanvas.vue'
 import AdjustmentCanvas from './components/AdjustmentCanvas.vue'
 
 const logs = ref(null as HTMLDivElement | null)
-
-const forSave = ref(null as HTMLCanvasElement | null)
 
 function log(message: string) {
   logs.value!.innerHTML += `<div>${message}</div>`
@@ -107,24 +105,27 @@ function download(href: string, filename: string) {
   a.click()
 }
 
+function renderCurrentResult() {
+  if (!state.left || !state.right) return null
+  return renderResult({
+    left: state.left,
+    right: state.right,
+    xOffset: state.xOffset,
+    yOffset: state.yOffset,
+  })
+}
+
 function downloadJPEG() {
-  let canvas = document.querySelector("canvas#preview") as HTMLCanvasElement
+  let canvas = renderCurrentResult()
+  if (!canvas) return
   download(canvas.toDataURL("image/jpeg"), `${state.leftName}_${state.rightName}.jpg`)
 }
 
 function downloadSeparateJPEG() {
-  let canvas = document.querySelector("canvas#preview") as HTMLCanvasElement
-  let context = forSave.value!.getContext('2d')!
-  let width = canvas.width / 2
-  let height = canvas.height
-  forSave.value!.width = width
-  forSave.value!.height = height
-  context.drawImage(canvas, 0, 0, width, height, 0, 0, width, height)
-  let leftData = forSave.value!.toDataURL("image/jpeg")
-  context.drawImage(canvas, width, 0, width, height, 0, 0, width, height)
-  let rightData = forSave.value!.toDataURL("image/jpeg")
-  download(leftData, `${state.leftName}_${state.rightName}_left.jpg`)
-  download(rightData, `${state.leftName}_${state.rightName}_right.jpg`)
+  let canvas = renderCurrentResult()
+  if (!canvas) return
+  download(extractHalf(canvas, 'left').toDataURL("image/jpeg"), `${state.leftName}_${state.rightName}_left.jpg`)
+  download(extractHalf(canvas, 'right').toDataURL("image/jpeg"), `${state.leftName}_${state.rightName}_right.jpg`)
 }
 </script>
 

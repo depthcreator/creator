@@ -14,6 +14,11 @@ dist-ssr
 coverage
 *.local
 
+# vue-tsc --build output
+*.tsbuildinfo
+/vite.config.js
+/vite.config.d.ts
+
 /cypress/videos/
 /cypress/screenshots/
 
