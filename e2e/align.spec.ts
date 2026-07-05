@@ -95,7 +95,9 @@ test('auto align finds exact offsets and exports match the preview', async ({ pa
   for (let run = 1; run <= 3; run++) {
     if (run > 1) {
       // nudge the offset away from the expected value so we can tell
-      // when this run's align has actually completed
+      // when this run's align has actually completed; arrow keys only
+      // work while the adjustment canvas is focused
+      await page.locator('canvas[tabindex]').focus()
       await page.keyboard.press('ArrowRight')
       await waitForOffsets(page, EXPECTED_X + 1, EXPECTED_Y)
     }
@@ -108,7 +110,7 @@ test('auto align finds exact offsets and exports match the preview', async ({ pa
   const resultH = IMAGE_H - EXPECTED_Y
 
   const previewSize = await page.evaluate(() => {
-    const c = document.querySelector('canvas:not(#matches)') as HTMLCanvasElement
+    const c = document.querySelector('.container canvas') as HTMLCanvasElement
     return [c.width, c.height]
   })
   expect(previewSize).toEqual([resultW, resultH])

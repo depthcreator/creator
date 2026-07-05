@@ -1,18 +1,10 @@
 <template>
-  <canvas ref="canvas" height="0" @mousedown="mousedown" @mousemove="mousemove" @mouseup="mouseup"></canvas>
+  <canvas ref="canvas" height="0" tabindex="0" @keydown="keydown" @mousedown="mousedown" @mousemove="mousemove" @mouseup="mouseup"></canvas>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watchEffect, onUnmounted } from "vue"
-
-interface AlignmentState {
-  left: HTMLImageElement | null
-  right: HTMLImageElement | null
-  leftName: string
-  rightName: string
-  xOffset: number
-  yOffset: number
-}
+import { ref, onMounted, watchEffect } from "vue"
+import type { AlignmentState } from "../functions/createAlignmentSession"
 
 const props = defineProps<{
   alignmentState: AlignmentState
@@ -39,9 +31,7 @@ onMounted(() => {
       canvas.value!.height = 0
     }
   })
-  document.body.addEventListener('keydown', keydown)
 })
-onUnmounted(() => document.body.removeEventListener('keydown', keydown))
 
 function keydown(e: KeyboardEvent) {
   switch (e.key) {
@@ -76,6 +66,8 @@ const startingOffset = ref({
 
 function mousedown(e: MouseEvent) {
   if (e.which == 1) {
+    // not all browsers focus a tabindex element on click (e.g. Safari)
+    canvas.value!.focus()
     dragging.value = true
     startingPoint.value = {x: e.screenX, y: e.screenY}
     startingOffset.value = {x: props.alignmentState.xOffset, y: props.alignmentState.yOffset}
@@ -99,5 +91,8 @@ function mousemove(e: MouseEvent) {
 canvas {
   width: 100%;
   cursor: move;
+}
+canvas:focus {
+  outline: 1px solid var(--indigo5);
 }
 </style>

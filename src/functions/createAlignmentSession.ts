@@ -2,7 +2,7 @@ import { reactive, computed, ref, nextTick } from "vue"
 import align from "./align"
 import { loadOpenCV } from "./opencv"
 
-interface AlignmentState {
+export interface AlignmentState {
   left: HTMLImageElement | null
   right: HTMLImageElement | null
   leftName: string
@@ -11,7 +11,17 @@ interface AlignmentState {
   yOffset: number
 }
 
-export default function useAlignmentState(log: (message: string) => void) {
+export interface AlignmentSessionOptions {
+  // where align() draws its feature-match debug view; a getter because
+  // template refs are only filled after mount
+  debugMatchesCanvas?: () => HTMLCanvasElement | null
+}
+
+export type AlignmentSession = ReturnType<typeof createAlignmentSession>
+
+// each call creates an independent editing session; nothing is shared
+// between sessions, so multiple editors can coexist
+export function createAlignmentSession(options: AlignmentSessionOptions = {}) {
   const state = reactive({
     left: null,
     right: null,
@@ -21,13 +31,18 @@ export default function useAlignmentState(log: (message: string) => void) {
     yOffset: 0
   } as AlignmentState)
 
+  const logs = ref<string[]>([])
+
+  function log(message: string) {
+    logs.value.push(message)
+  }
+
   async function processAlign() {
     if (state.left && state.right) {
       try {
         log("User: Automatic align")
         await loadOpenCV()
-        let [xOffset, yOffset] = align(state.left, state.right, 0.7)
-        console.log(xOffset, yOffset)
+        let [xOffset, yOffset] = align(state.left, state.right, 0.7, options.debugMatchesCanvas?.() ?? undefined)
         state.xOffset = xOffset
         state.yOffset = yOffset
       } catch(e) {
@@ -80,6 +95,8 @@ export default function useAlignmentState(log: (message: string) => void) {
 
   return {
     state,
+    logs,
+    log,
     processAlign,
     metadata,
     reset,

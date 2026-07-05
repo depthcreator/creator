@@ -8,15 +8,7 @@
 <script setup lang="ts">
 import { ref, watchEffect, onMounted } from 'vue'
 import { renderResult } from '../functions/renderResult'
-
-interface AlignmentState {
-  left: HTMLImageElement | null
-  right: HTMLImageElement | null
-  leftName: string
-  rightName: string
-  xOffset: number
-  yOffset: number
-}
+import type { AlignmentState } from '../functions/createAlignmentSession'
 
 const props = defineProps<{
   alignmentState: AlignmentState

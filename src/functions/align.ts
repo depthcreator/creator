@@ -1,11 +1,11 @@
 import { calculateOffsets, median, type Point } from './offsets'
 
-function drawMatches(left: cv.Mat, leftKeyPoints: cv.KeyPointVector, right: cv.Mat, rightKeyPoints: cv.KeyPointVector, matches: cv.DMatchVector, canvasName: string) {
+function drawMatches(left: cv.Mat, leftKeyPoints: cv.KeyPointVector, right: cv.Mat, rightKeyPoints: cv.KeyPointVector, matches: cv.DMatchVector, canvas: HTMLCanvasElement) {
   let imMatches = new cv.Mat()
   let color = new cv.Scalar(0, 255, 0, 255)
 
   cv.drawMatches(left, leftKeyPoints, right, rightKeyPoints, matches, imMatches, color)
-  cv.imshow(canvasName, imMatches)
+  cv.imshow(canvas, imMatches)
   imMatches.delete()
 }
 
@@ -83,7 +83,7 @@ function detectAndMatch(leftMat: cv.Mat, rightMat: cv.Mat) {
   }
 }
 
-export default function align(leftElement: HTMLImageElement, rightElement: HTMLImageElement, knnDistanceOption: number): [number, number] {
+export default function align(leftElement: HTMLImageElement, rightElement: HTMLImageElement, knnDistanceOption: number, debugCanvas?: HTMLCanvasElement): [number, number] {
   // the result might differ when read from image elements of different size
   // and a display:none image element will give slightly different result comparing to a full-size element for unknown reason
   let left = cv.imread(leftElement)
@@ -100,7 +100,7 @@ export default function align(leftElement: HTMLImageElement, rightElement: HTMLI
   console.log("feature matched")
 
   let goodMatches = filterMatches(matches, knnDistanceOption)
-  drawMatches(left, leftKeyPoints, right, rightKeyPoints, goodMatches, 'matches')
+  if (debugCanvas) drawMatches(left, leftKeyPoints, right, rightKeyPoints, goodMatches, debugCanvas)
 
   let [leftPoints, rightPoints] = extractPoints(goodMatches, leftKeyPoints, rightKeyPoints)
 

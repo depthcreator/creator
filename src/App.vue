@@ -1,6 +1,6 @@
 <template>
   <div class="hidden-canvas">
-    <canvas id="matches" style="width: 0; height: 0;"></canvas>
+    <canvas ref="matchesCanvas" style="width: 0; height: 0;"></canvas>
   </div>
   <main>
     <section class="first-column">
@@ -45,14 +45,14 @@
       <TitleBox title="Result Image">
         <PreviewCanvas :alignmentState="state"/>
       </TitleBox>
-      <TitleBox title="Adjustment (by mouse or arrow keys)">
+      <TitleBox title="Adjustment (drag, or focus + arrow keys)">
         <AdjustmentCanvas :alignmentState="state"/>
       </TitleBox>
     </section>
     <section class="third-column">
       <TitleBox title="Logs">
-        <div ref="logs" class="logs">
-          <div v-for="message in logs">{{ message }}</div>
+        <div ref="logsContainer" class="logs">
+          <div v-for="(message, index) in logs" :key="index">{{ message }}</div>
         </div>
       </TitleBox>
       <TitleBox title="Alignment Detail">
@@ -70,33 +70,35 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import TitleBox from './components/TitleBox.vue'
 import ImageDropbox from './components/ImageDropbox.vue'
-import useAlignmentState from './functions/useAlignmentState'
+import { createAlignmentSession } from './functions/createAlignmentSession'
 import { useOpenCV } from './functions/opencv'
 import { renderResult, extractHalf } from './functions/renderResult'
 import PreviewCanvas from './components/PreviewCanvas.vue'
 import AdjustmentCanvas from './components/AdjustmentCanvas.vue'
 
-const logs = ref(null as HTMLDivElement | null)
-
-function log(message: string) {
-  logs.value!.innerHTML += `<div>${message}</div>`
-  logs.value!.scrollTo(0, 100000)
-}
+const matchesCanvas = ref(null as HTMLCanvasElement | null)
+const logsContainer = ref(null as HTMLDivElement | null)
 
 const { opencvStatus } = useOpenCV()
 
 const {
   state,
+  logs,
   processAlign,
   metadata,
   reset,
   swap,
   viewStatus,
   setImage,
-} = useAlignmentState(log)
+} = createAlignmentSession({ debugMatchesCanvas: () => matchesCanvas.value })
+
+watch(() => logs.value.length, async () => {
+  await nextTick()
+  logsContainer.value?.scrollTo(0, logsContainer.value.scrollHeight)
+})
 
 function download(href: string, filename: string) {
   let a = document.createElement('a')
