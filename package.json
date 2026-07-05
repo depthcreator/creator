@@ -6,6 +6,8 @@
     "dev": "vite",
     "build": "run-p type-check build-only",
     "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
@@ -21,6 +23,7 @@
     "sass": "^1.65.1",
     "typescript": "~5.1.6",
     "vite": "^4.4.6",
+    "vitest": "^0.34.6",
     "vue-tsc": "^1.8.6"
   }
 }

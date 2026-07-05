@@ -1,7 +1,18 @@
-// @ts-nocheck
-export default function calculateIntersection(left, right, xOffset, yOffset) {
-  let leftRect = {x: 0, y: 0, w: 0, h: 0}
-  let rightRect = {x: 0, y: 0, w: 0, h: 0}
+export interface Rect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+interface Size {
+  width: number
+  height: number
+}
+
+export default function calculateIntersection(left: Size, right: Size, xOffset: number, yOffset: number): [Rect, Rect] {
+  let leftRect: Rect = {x: 0, y: 0, w: 0, h: 0}
+  let rightRect: Rect = {x: 0, y: 0, w: 0, h: 0}
   if (xOffset > 0) {
     leftRect.x = xOffset
     leftRect.w = left.width - xOffset
@@ -10,7 +21,7 @@ export default function calculateIntersection(left, right, xOffset, yOffset) {
   } else {
     leftRect.x = 0
     leftRect.w = right.width + xOffset
-    rightRect.x = -xOffset
+    rightRect.x = Math.abs(xOffset)
     rightRect.w = leftRect.w
   }
   if (yOffset > 0) {
@@ -21,7 +32,7 @@ export default function calculateIntersection(left, right, xOffset, yOffset) {
   } else {
     leftRect.y = 0
     leftRect.h = right.height + yOffset
-    rightRect.y = -yOffset
+    rightRect.y = Math.abs(yOffset)
     rightRect.h = leftRect.h
   }
   return [leftRect, rightRect]
