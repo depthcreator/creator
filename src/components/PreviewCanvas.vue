@@ -36,6 +36,7 @@ onMounted(() => {
         right: props.alignmentState.right,
         xOffset: props.alignmentState.xOffset,
         yOffset: props.alignmentState.yOffset,
+        rotation: props.alignmentState.rotation,
       }, preview.value!)
       //let maxHeight = calculateHeight(props.alignmentState.left, props.alignmentState.right)
       let maxHeight = 300

@@ -5,9 +5,11 @@ declare namespace cv {
     constructor()
     cols: number
     rows: number
+    data: Uint8Array
     type(): number
     channels(): number
     depth(): number
+    empty(): boolean
     delete(): void
   }
 
@@ -65,7 +67,20 @@ declare namespace cv {
   }
 
   const COLOR_BGR2GRAY: number
+  const CV_32FC2: number
+  const RANSAC: number
 
+  function matFromArray(rows: number, cols: number, type: number, array: number[]): Mat
+  function estimateAffine2D(
+    from: Mat,
+    to: Mat,
+    inliers: Mat,
+    method: number,
+    ransacReprojThreshold: number,
+    maxIters: number,
+    confidence: number,
+    refineIters: number
+  ): Mat
   function imread(source: HTMLImageElement | HTMLCanvasElement | string): Mat
   function imshow(canvas: HTMLCanvasElement | string, mat: Mat): void
   function cvtColor(src: Mat, dst: Mat, code: number): void

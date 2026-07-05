@@ -5,6 +5,7 @@ export interface RenderableState {
   right: HTMLImageElement
   xOffset: number
   yOffset: number
+  rotation: number
 }
 
 // draws the aligned side-by-side result at full resolution;
@@ -16,7 +17,19 @@ export function renderResult(state: RenderableState, target?: HTMLCanvasElement)
   canvas.width = leftRect.w * 2
   canvas.height = leftRect.h
   context.drawImage(state.left, leftRect.x, leftRect.y, leftRect.w, leftRect.h, 0, 0, leftRect.w, leftRect.h)
-  context.drawImage(state.right, rightRect.x, rightRect.y, rightRect.w, rightRect.h, leftRect.w, 0, leftRect.w, leftRect.h)
+  if (state.rotation === 0) {
+    context.drawImage(state.right, rightRect.x, rightRect.y, rightRect.w, rightRect.h, leftRect.w, 0, leftRect.w, leftRect.h)
+  } else {
+    // same crop, but rotating the right image about its own center first
+    context.save()
+    context.beginPath()
+    context.rect(leftRect.w, 0, leftRect.w, leftRect.h)
+    context.clip()
+    context.translate(leftRect.w - rightRect.x + state.right.width / 2, -rightRect.y + state.right.height / 2)
+    context.rotate(state.rotation * Math.PI / 180)
+    context.drawImage(state.right, -state.right.width / 2, -state.right.height / 2)
+    context.restore()
+  }
   return canvas
 }
 

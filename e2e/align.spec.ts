@@ -40,8 +40,14 @@ const toBuffer = (dataUrl: string) => Buffer.from(dataUrl.split(',')[1], 'base64
 function waitForOffsets(page: Page, x: number, y: number) {
   return page.waitForFunction(
     ([ex, ey]) => {
-      const text = document.querySelector('pre')?.textContent ?? ''
-      return text.includes(`"xOffset": ${ex},`) && text.includes(`"yOffset": ${ey}`)
+      try {
+        const meta = JSON.parse(document.querySelector('pre')?.textContent ?? '')
+        // the scenes differ by pure translation; subpixel keypoint noise
+        // may leave the estimated rotation one rounding step away from 0
+        return meta.xOffset === ex && meta.yOffset === ey && Math.abs(meta.rotation) <= 0.01
+      } catch {
+        return false
+      }
     },
     [x, y],
     { timeout: 60000 }

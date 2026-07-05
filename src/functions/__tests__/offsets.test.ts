@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { median, calculateOffsets } from '../offsets'
+import { median, calculateOffsets, solveRigidMotion } from '../offsets'
 
 describe('median', () => {
   it('returns the middle value for an odd-length array', () => {
@@ -44,5 +44,42 @@ describe('calculateOffsets', () => {
     const [xd, yd] = calculateOffsets([], [])
     expect(xd).toEqual([])
     expect(yd).toEqual([])
+  })
+})
+
+describe('solveRigidMotion', () => {
+  it('recovers a pure translation with zero rotation', () => {
+    const src = [{x: 0, y: 0}, {x: 10, y: 0}, {x: 0, y: 10}]
+    const dst = src.map(p => ({x: p.x + 5, y: p.y - 3}))
+    const motion = solveRigidMotion(src, dst)!
+    expect(motion.angle).toBeCloseTo(0)
+    expect(motion.tx).toBeCloseTo(5)
+    expect(motion.ty).toBeCloseTo(-3)
+  })
+
+  it('recovers a known rotation and translation', () => {
+    const angle = 0.1
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    const src = [{x: 3, y: 7}, {x: -20, y: 14}, {x: 8, y: -2}, {x: 15, y: 15}]
+    const dst = src.map(p => ({x: cos * p.x - sin * p.y + 4, y: sin * p.x + cos * p.y - 6}))
+    const motion = solveRigidMotion(src, dst)!
+    expect(motion.angle).toBeCloseTo(angle)
+    expect(motion.tx).toBeCloseTo(4)
+    expect(motion.ty).toBeCloseTo(-6)
+  })
+
+  it('keeps scale locked to 1 for uniformly scaled points', () => {
+    const src = [{x: -10, y: 0}, {x: 10, y: 0}]
+    const dst = [{x: -20, y: 0}, {x: 20, y: 0}]
+    const motion = solveRigidMotion(src, dst)!
+    expect(motion.angle).toBeCloseTo(0)
+    expect(motion.tx).toBeCloseTo(0)
+    expect(motion.ty).toBeCloseTo(0)
+  })
+
+  it('returns null for fewer than two points', () => {
+    expect(solveRigidMotion([{x: 1, y: 2}], [{x: 3, y: 4}])).toBeNull()
+    expect(solveRigidMotion([], [])).toBeNull()
   })
 })

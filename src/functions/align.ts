@@ -1,4 +1,11 @@
-import { calculateOffsets, median, type Point } from './offsets'
+import { calculateOffsets, median, solveRigidMotion, type Point } from './offsets'
+
+export interface AlignResult {
+  xOffset: number
+  yOffset: number
+  // degrees, applied to the right image about its own center
+  rotation: number
+}
 
 function drawMatches(left: cv.Mat, leftKeyPoints: cv.KeyPointVector, right: cv.Mat, rightKeyPoints: cv.KeyPointVector, matches: cv.DMatchVector, canvas: HTMLCanvasElement) {
   let imMatches = new cv.Mat()
@@ -38,6 +45,57 @@ function extractPoints(matches: cv.DMatchVector, leftKeyPoints: cv.KeyPointVecto
   }
 
   return [leftPoints, rightPoints]
+}
+
+// Estimates a rigid-body transform (rotation + translation, scale locked
+// to 1) mapping right points onto left points. opencv.js does not ship a
+// rigid-body estimator, so RANSAC (via estimateAffine2D) rejects outlier
+// matches first, then the optimal scale=1 rotation is solved on the
+// inliers (Kabsch). The rotation is anchored at the right image center, so
+// xOffset/yOffset stay comparable to the translation-only values the UI
+// always used. Returns null when there are not enough usable matches.
+function estimateRigidTransform(leftPoints: Point[], rightPoints: Point[], center: Point): AlignResult | null {
+  let n = rightPoints.length
+  if (n < 3) return null
+
+  let srcData: number[] = []
+  let dstData: number[] = []
+  for (let i = 0; i < n; i++) {
+    srcData.push(rightPoints[i].x, rightPoints[i].y)
+    dstData.push(leftPoints[i].x, leftPoints[i].y)
+  }
+  let srcMat = cv.matFromArray(n, 1, cv.CV_32FC2, srcData)
+  let dstMat = cv.matFromArray(n, 1, cv.CV_32FC2, dstData)
+  let inlierMask = new cv.Mat()
+  let M = cv.estimateAffine2D(srcMat, dstMat, inlierMask, cv.RANSAC, 3, 2000, 0.99, 10)
+
+  let src: Point[] = []
+  let dst: Point[] = []
+  if (!M.empty()) {
+    for (let i = 0; i < n; i++) {
+      if (inlierMask.data[i]) {
+        src.push(rightPoints[i])
+        dst.push(leftPoints[i])
+      }
+    }
+  }
+  srcMat.delete()
+  dstMat.delete()
+  inlierMask.delete()
+  M.delete()
+  console.log("RANSAC kept " + src.length + " inliers out of " + n + " matches")
+
+  let motion = solveRigidMotion(src, dst)
+  if (!motion) return null
+
+  let cos = Math.cos(motion.angle)
+  let sin = Math.sin(motion.angle)
+  // re-anchor the translation so the rotation pivots at the image center
+  return {
+    xOffset: Math.round(motion.tx + (cos * center.x - sin * center.y - center.x)),
+    yOffset: Math.round(motion.ty + (sin * center.x + cos * center.y - center.y)),
+    rotation: Math.round(motion.angle * 180 / Math.PI * 100) / 100
+  }
 }
 
 function detectAndMatch(leftMat: cv.Mat, rightMat: cv.Mat) {
@@ -83,7 +141,7 @@ function detectAndMatch(leftMat: cv.Mat, rightMat: cv.Mat) {
   }
 }
 
-export default function align(leftElement: HTMLImageElement, rightElement: HTMLImageElement, knnDistanceOption: number, debugCanvas?: HTMLCanvasElement): [number, number] {
+export default function align(leftElement: HTMLImageElement, rightElement: HTMLImageElement, knnDistanceOption: number, debugCanvas?: HTMLCanvasElement): AlignResult {
   // the result might differ when read from image elements of different size
   // and a display:none image element will give slightly different result comparing to a full-size element for unknown reason
   let left = cv.imread(leftElement)
@@ -104,7 +162,7 @@ export default function align(leftElement: HTMLImageElement, rightElement: HTMLI
 
   let [leftPoints, rightPoints] = extractPoints(goodMatches, leftKeyPoints, rightKeyPoints)
 
-  let [xd, yd] = calculateOffsets(leftPoints, rightPoints)
+  let rigid = estimateRigidTransform(leftPoints, rightPoints, {x: right.cols / 2, y: right.rows / 2})
 
   left.delete()
   right.delete()
@@ -113,7 +171,15 @@ export default function align(leftElement: HTMLImageElement, rightElement: HTMLI
   matches.delete()
   goodMatches.delete()
 
+  if (rigid) {
+    console.log('rigid transform: ', rigid)
+    return rigid
+  }
+
+  // fallback: translation-only estimate from the match offset medians
+  let [xd, yd] = calculateOffsets(leftPoints, rightPoints)
+
   console.log('median xd: ' + median(xd))
   console.log('median yd: ' + median(yd))
-  return [Math.round(median(xd)), Math.round(median(yd))]
+  return {xOffset: Math.round(median(xd)), yOffset: Math.round(median(yd)), rotation: 0}
 }

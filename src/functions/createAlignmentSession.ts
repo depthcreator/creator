@@ -9,6 +9,8 @@ export interface AlignmentState {
   rightName: string
   xOffset: number
   yOffset: number
+  // degrees, applied to the right image about its own center
+  rotation: number
 }
 
 export interface AlignmentSessionOptions {
@@ -28,7 +30,8 @@ export function createAlignmentSession(options: AlignmentSessionOptions = {}) {
     leftName: "",
     rightName: "",
     xOffset: 0,
-    yOffset: 0
+    yOffset: 0,
+    rotation: 0
   } as AlignmentState)
 
   const logs = ref<string[]>([])
@@ -42,9 +45,10 @@ export function createAlignmentSession(options: AlignmentSessionOptions = {}) {
       try {
         log("User: Automatic align")
         await loadOpenCV()
-        let [xOffset, yOffset] = align(state.left, state.right, 0.7, options.debugMatchesCanvas?.() ?? undefined)
+        let {xOffset, yOffset, rotation} = align(state.left, state.right, 0.7, options.debugMatchesCanvas?.() ?? undefined)
         state.xOffset = xOffset
         state.yOffset = yOffset
+        state.rotation = rotation
       } catch(e) {
         // if the matching process die, it is not rescueable
         window.alert(e)
@@ -56,7 +60,8 @@ export function createAlignmentSession(options: AlignmentSessionOptions = {}) {
   "left": "${state.leftName}",
   "right": "${state.rightName}",
   "xOffset": ${state.xOffset},
-  "yOffset": ${state.yOffset}
+  "yOffset": ${state.yOffset},
+  "rotation": ${state.rotation}
 }`)
 
   function reset() {
@@ -66,6 +71,7 @@ export function createAlignmentSession(options: AlignmentSessionOptions = {}) {
     state.rightName = ""
     state.xOffset = 0
     state.yOffset = 0
+    state.rotation = 0
     log("User: Dropbox reset")
   }
 
@@ -78,6 +84,9 @@ export function createAlignmentSession(options: AlignmentSessionOptions = {}) {
     state.rightName = tempName
     state.xOffset = -state.xOffset
     state.yOffset = -state.yOffset
+    // exact only when rotation pivots match; close enough for the small
+    // angles stereo pairs have — rerun Automatic align for a precise result
+    state.rotation = -state.rotation
     log("User: Left-right swap")
   }
 

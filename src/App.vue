@@ -45,7 +45,7 @@
       <TitleBox title="Result Image">
         <PreviewCanvas :alignmentState="state"/>
       </TitleBox>
-      <TitleBox title="Adjustment (drag, or focus + arrow keys)">
+      <TitleBox title="Adjustment (drag, or focus + arrow keys; Q/E to rotate)">
         <AdjustmentCanvas :alignmentState="state"/>
       </TitleBox>
     </section>
@@ -114,6 +114,7 @@ function renderCurrentResult() {
     right: state.right,
     xOffset: state.xOffset,
     yOffset: state.yOffset,
+    rotation: state.rotation,
   })
 }
 
