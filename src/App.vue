@@ -22,7 +22,11 @@
       </TitleBox>
       <TitleBox title="Functions">
         <div style="margin-left: 5px;">
-          <button @click="processAlign">Automatic align</button>
+          <button @click="processAlign" :disabled="opencvStatus === 'loading'">
+            <div>Automatic align</div>
+            <div v-if="opencvStatus === 'loading'">(loading OpenCV...)</div>
+            <div v-else-if="opencvStatus === 'error'">(load failed, click to retry)</div>
+          </button>
           <br>
           <button @click="swap">
             <div>Left-right swap</div>
@@ -71,6 +75,7 @@ import { reactive, watch, ref } from 'vue'
 import TitleBox from './components/TitleBox.vue'
 import ImageDropbox from './components/ImageDropbox.vue'
 import useAlignmentState from './functions/useAlignmentState'
+import { useOpenCV } from './functions/opencv'
 import PreviewCanvas from './components/PreviewCanvas.vue'
 import AdjustmentCanvas from './components/AdjustmentCanvas.vue'
 
@@ -82,6 +87,8 @@ function log(message: string) {
   logs.value!.innerHTML += `<div>${message}</div>`
   logs.value!.scrollTo(0, 100000)
 }
+
+const { opencvStatus } = useOpenCV()
 
 const {
   state,
@@ -192,6 +199,10 @@ button:hover {
   background-color: var(--indigo5);
 }
 button:active {
+  background-color: var(--indigo7);
+}
+button:disabled {
+  opacity: 0.5;
   background-color: var(--indigo7);
 }
 

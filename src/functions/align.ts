@@ -6,6 +6,7 @@ function drawMatches(left: cv.Mat, leftKeyPoints: cv.KeyPointVector, right: cv.M
 
   cv.drawMatches(left, leftKeyPoints, right, rightKeyPoints, matches, imMatches, color)
   cv.imshow(canvasName, imMatches)
+  imMatches.delete()
 }
 
 function filterMatches(matches: cv.DMatchVectorVector, ratio: number): cv.DMatchVector {
@@ -21,6 +22,7 @@ function filterMatches(matches: cv.DMatchVectorVector, ratio: number): cv.DMatch
       goodMatches.push_back(dMatch1)
       counter++
     }
+    match.delete()
   }
   console.log(ratio)
   console.log("keeping ", counter, " points in good_matches vector out of ", matches.size(), " contained in this match vector:", matches)
@@ -52,10 +54,12 @@ function detectAndMatch(leftMat: cv.Mat, rightMat: cv.Mat) {
   let rightDescriptors = new cv.Mat()
 
   let orb = new cv.ORB()
+  let leftMask = new cv.Mat()
+  let rightMask = new cv.Mat()
 
   // too large dimensions causes it to blow
-  orb.detectAndCompute(leftGray, new cv.Mat(), leftKeyPoints, leftDescriptors)
-  orb.detectAndCompute(rightGray, new cv.Mat(), rightKeyPoints, rightDescriptors)
+  orb.detectAndCompute(leftGray, leftMask, leftKeyPoints, leftDescriptors)
+  orb.detectAndCompute(rightGray, rightMask, rightKeyPoints, rightDescriptors)
   console.log("features detected")
 
   let bf = new cv.BFMatcher()
@@ -63,6 +67,14 @@ function detectAndMatch(leftMat: cv.Mat, rightMat: cv.Mat) {
   bf.knnMatch(leftDescriptors, rightDescriptors, matches, 2)
   console.log("knn matched")
 
+  leftGray.delete()
+  rightGray.delete()
+  leftMask.delete()
+  rightMask.delete()
+  leftDescriptors.delete()
+  rightDescriptors.delete()
+  orb.delete()
+  bf.delete()
 
   return {
     leftKeyPoints,
@@ -93,6 +105,13 @@ export default function align(leftElement: HTMLImageElement, rightElement: HTMLI
   let [leftPoints, rightPoints] = extractPoints(goodMatches, leftKeyPoints, rightKeyPoints)
 
   let [xd, yd] = calculateOffsets(leftPoints, rightPoints)
+
+  left.delete()
+  right.delete()
+  leftKeyPoints.delete()
+  rightKeyPoints.delete()
+  matches.delete()
+  goodMatches.delete()
 
   console.log('median xd: ' + median(xd))
   console.log('median yd: ' + median(yd))

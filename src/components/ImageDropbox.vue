@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onUnmounted } from 'vue'
 
 const props = defineProps<{
   image: HTMLImageElement | null
@@ -19,14 +19,25 @@ const emit = defineEmits<{
 const preview = ref(null as HTMLImageElement | null)
 const origin = ref(null as HTMLImageElement | null)
 
+// the object URL currently used by the origin image element; the previous
+// one can only be revoked once the element has loaded its replacement
+let currentUrl: string | null = null
+
 function useImage(e: any) {
-  let file = e.target.files[0] as File
+  let file = e.target.files[0] as File | undefined
+  if (!file) return
   let url = URL.createObjectURL(file)
   origin.value!.src = url
   origin.value!.onload = function() {
+    if (currentUrl) URL.revokeObjectURL(currentUrl)
+    currentUrl = url
     emit('useImage', origin.value!, file)
   }
 }
+
+onUnmounted(() => {
+  if (currentUrl) URL.revokeObjectURL(currentUrl)
+})
 </script>
 
 <style scoped>

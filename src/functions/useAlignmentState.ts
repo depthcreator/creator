@@ -1,5 +1,6 @@
 import { reactive, computed, ref, nextTick } from "vue"
 import align from "./align"
+import { loadOpenCV } from "./opencv"
 
 interface AlignmentState {
   left: HTMLImageElement | null
@@ -20,10 +21,11 @@ export default function useAlignmentState(log: (message: string) => void) {
     yOffset: 0
   } as AlignmentState)
 
-  function processAlign() {
+  async function processAlign() {
     if (state.left && state.right) {
       try {
         log("User: Automatic align")
+        await loadOpenCV()
         let [xOffset, yOffset] = align(state.left, state.right, 0.7)
         console.log(xOffset, yOffset)
         state.xOffset = xOffset
