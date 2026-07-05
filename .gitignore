@@ -14,6 +14,10 @@ dist-ssr
 coverage
 *.local
 
+# playwright output
+/test-results/
+/playwright-report/
+
 # vue-tsc --build output
 *.tsbuildinfo
 /vite.config.js

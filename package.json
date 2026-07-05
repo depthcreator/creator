@@ -8,6 +8,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
@@ -15,6 +16,7 @@
     "vue": "^3.5.39"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tsconfig/node22": "^22.0.5",
     "@types/node": "^22.20.0",
     "@vitejs/plugin-vue": "^6.0.7",
