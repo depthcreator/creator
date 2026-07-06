@@ -51,15 +51,25 @@ function rotateWithOpenCV(image: HTMLImageElement | HTMLCanvasElement, degrees: 
   return canvas
 }
 
-// export-quality variant of renderResult: same geometry, but the rotation is
-// resampled with Lanczos when OpenCV is available. Kept out of the live
-// preview path because a full-resolution warp per keypress would lag.
-export function renderResultHighQuality(state: RenderableState): HTMLCanvasElement {
+// gates renderResultHighQuality: the Lanczos warp is ~15-44x slower than the
+// canvas rotation (about 1.2s at 12MP), so it stays off until we decide it
+// is worth the export delay; flip to true to re-enable it for downloads
+export const LANCZOS_EXPORT_ENABLED = false
+
+// Lanczos variant of renderResult: same geometry, but the rotation is
+// resampled with OpenCV Lanczos (sharper than the canvas bilinear rotation)
+// when the runtime is available, falling back to the canvas path otherwise
+export function renderResultLanczos(state: RenderableState): HTMLCanvasElement {
   if (state.rotation !== 0) {
     const rotated = rotateWithOpenCV(state.right, state.rotation)
     if (rotated) return renderResult({ ...state, right: rotated, rotation: 0 })
   }
   return renderResult(state)
+}
+
+// export-quality render: Lanczos when enabled, plain canvas otherwise
+export function renderResultHighQuality(state: RenderableState): HTMLCanvasElement {
+  return LANCZOS_EXPORT_ENABLED ? renderResultLanczos(state) : renderResult(state)
 }
 
 // extracts one eye's image from a rendered side-by-side result

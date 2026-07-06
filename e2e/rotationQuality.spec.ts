@@ -8,7 +8,9 @@ test('opencv export rotation matches the canvas rotation geometry', async ({ pag
 
   const result = await page.evaluate(async () => {
     const { loadOpenCV } = await import('/src/functions/opencv.ts')
-    const { renderResult, renderResultHighQuality } = await import('/src/functions/renderResult.ts')
+    // renderResultLanczos is tested directly so the geometry stays pinned
+    // even while LANCZOS_EXPORT_ENABLED keeps it out of the download path
+    const { renderResult, renderResultLanczos } = await import('/src/functions/renderResult.ts')
     await loadOpenCV()
 
     const scene = document.createElement('canvas')
@@ -25,7 +27,7 @@ test('opencv export rotation matches the canvas rotation geometry', async ({ pag
 
     const state = { left: image, right: image, xOffset: 0, yOffset: 0, rotation: 2 }
     const canvasResult = renderResult(state)
-    const opencvResult = renderResultHighQuality(state)
+    const opencvResult = renderResultLanczos(state)
 
     // centroid of the dark mark within the right half; the alpha check
     // excludes the transparent corner wedges the rotation leaves uncovered
