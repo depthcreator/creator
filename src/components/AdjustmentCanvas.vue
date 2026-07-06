@@ -56,10 +56,10 @@ function keydown(e: KeyboardEvent) {
       props.alignmentState.xOffset +=1
       break
     case 'q':
-      props.alignmentState.rotation = Math.round((props.alignmentState.rotation - 0.1) * 100) / 100
+      props.alignmentState.rotation = Math.round((props.alignmentState.rotation - 0.01) * 100) / 100
       break
     case 'e':
-      props.alignmentState.rotation = Math.round((props.alignmentState.rotation + 0.1) * 100) / 100
+      props.alignmentState.rotation = Math.round((props.alignmentState.rotation + 0.01) * 100) / 100
       break
   }
 }
