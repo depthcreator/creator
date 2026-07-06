@@ -66,9 +66,15 @@ declare namespace cv {
     constructor(...values: number[])
   }
 
+  class Size {
+    constructor(width: number, height: number)
+  }
+
   const COLOR_BGR2GRAY: number
   const CV_32FC2: number
   const RANSAC: number
+  const INTER_LANCZOS4: number
+  const BORDER_CONSTANT: number
 
   function matFromArray(rows: number, cols: number, type: number, array: number[]): Mat
   function estimateAffine2D(
@@ -82,6 +88,16 @@ declare namespace cv {
     refineIters: number
   ): Mat
   function imread(source: HTMLImageElement | HTMLCanvasElement | string): Mat
+  function getRotationMatrix2D(center: Point, angle: number, scale: number): Mat
+  function warpAffine(
+    src: Mat,
+    dst: Mat,
+    M: Mat,
+    dsize: Size,
+    flags: number,
+    borderMode: number,
+    borderValue: Scalar
+  ): void
   function imshow(canvas: HTMLCanvasElement | string, mat: Mat): void
   function cvtColor(src: Mat, dst: Mat, code: number): void
   function drawMatches(

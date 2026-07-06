@@ -75,7 +75,7 @@ import TitleBox from './components/TitleBox.vue'
 import ImageDropbox from './components/ImageDropbox.vue'
 import { createAlignmentSession } from './functions/createAlignmentSession'
 import { useOpenCV } from './functions/opencv'
-import { renderResult, extractHalf } from './functions/renderResult'
+import { renderResultHighQuality, extractHalf } from './functions/renderResult'
 import PreviewCanvas from './components/PreviewCanvas.vue'
 import AdjustmentCanvas from './components/AdjustmentCanvas.vue'
 
@@ -109,7 +109,7 @@ function download(href: string, filename: string) {
 
 function renderCurrentResult() {
   if (!state.left || !state.right) return null
-  return renderResult({
+  return renderResultHighQuality({
     left: state.left,
     right: state.right,
     xOffset: state.xOffset,
