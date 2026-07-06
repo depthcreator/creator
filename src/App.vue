@@ -100,11 +100,27 @@ watch(() => logs.value.length, async () => {
   logsContainer.value?.scrollTo(0, logsContainer.value.scrollHeight)
 })
 
+// toDataURL/toBlob without a quality falls back to a browser default
+// (~0.92 with chroma subsampling); encode explicitly to keep more detail
+const JPEG_QUALITY = 0.95
+
 function download(href: string, filename: string) {
   let a = document.createElement('a')
   a.href = href
   a.download = filename
   a.click()
+}
+
+function canvasToJPEG(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('JPEG encoding failed')), 'image/jpeg', JPEG_QUALITY)
+  })
+}
+
+async function downloadAsJPEG(canvas: HTMLCanvasElement, filename: string) {
+  const href = URL.createObjectURL(await canvasToJPEG(canvas))
+  download(href, filename)
+  URL.revokeObjectURL(href)
 }
 
 function renderCurrentResult() {
@@ -118,17 +134,18 @@ function renderCurrentResult() {
   })
 }
 
-function downloadJPEG() {
+async function downloadJPEG() {
   let canvas = renderCurrentResult()
   if (!canvas) return
-  download(canvas.toDataURL("image/jpeg"), `${state.leftName}_${state.rightName}.jpg`)
+  await downloadAsJPEG(canvas, `${state.leftName}_${state.rightName}.jpg`)
 }
 
-function downloadSeparateJPEG() {
+async function downloadSeparateJPEG() {
   let canvas = renderCurrentResult()
   if (!canvas) return
-  download(extractHalf(canvas, 'left').toDataURL("image/jpeg"), `${state.leftName}_${state.rightName}_left.jpg`)
-  download(extractHalf(canvas, 'right').toDataURL("image/jpeg"), `${state.leftName}_${state.rightName}_right.jpg`)
+  // sequential so the two downloads always arrive in left, right order
+  await downloadAsJPEG(extractHalf(canvas, 'left'), `${state.leftName}_${state.rightName}_left.jpg`)
+  await downloadAsJPEG(extractHalf(canvas, 'right'), `${state.leftName}_${state.rightName}_right.jpg`)
 }
 </script>
 
